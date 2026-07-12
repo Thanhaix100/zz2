@@ -1,14 +1,11 @@
 import { Button, Form, Input, Modal } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import "../../libs/i18n"
 import { useTranslation } from 'react-i18next';
 
 const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPassword, loadingPassword, warningPassword }) => {
     const { t } = useTranslation();
     const [password] = Form.useForm();
-    
-    // State quản lý thời gian đếm ngược
-    const [countdown, setCountdown] = useState(0);
 
     // Xử lý khi có cảnh báo sai mật khẩu (warningPassword = true)
     useEffect(() => {
@@ -20,31 +17,12 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     errors: [t('content.modal.password.form.password.warning')]
                 }
             ]);
-            // Bắt đầu đếm ngược 30s
-            setCountdown(30);
         }
     }, [warningPassword, password, t]);
 
-    // Xử lý logic đếm ngược
-    useEffect(() => {
-        let timer;
-        if (countdown > 0) {
-            timer = setInterval(() => {
-                setCountdown((prev) => prev - 1);
-            }, 1000);
-        } else if (countdown === 0 && warningPassword) {
-            // (Tùy chọn) Xóa lỗi khi hết 30s để người dùng nhập lại từ đầu
-            // password.setFields([{ name: 'password', errors: [] }]);
-        }
-
-        // Cleanup function để dọn dẹp interval khi component unmount hoặc countdown thay đổi
-        return () => clearInterval(timer);
-    }, [countdown, warningPassword]);
-
-    // Reset form và đếm ngược khi đóng modal
+    // Reset form khi đóng modal
     const handleCancel = () => {
         password.resetFields();
-        setCountdown(0);
         onCancelPasswordModal();
     };
 
@@ -103,11 +81,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                             }
                         ]}
                     >
-                        {/* Khóa ô nhập liệu khi đang đếm ngược */}
-                        <Input.Password 
-                            placeholder='Password' 
-                            disabled={countdown > 0} 
-                        />
+                        <Input.Password placeholder='Password' />
                     </Form.Item>
 
                     <Form.Item className='ant-submit-button'>
@@ -116,12 +90,8 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                             className='button-send'
                             htmlType="submit"
                             loading={loadingPassword}
-                            disabled={countdown > 0} // Khóa nút submit khi đang đếm ngược
                         >
-                            {/* Hiển thị số giây đếm ngược ngay trên nút */}
-                            {countdown > 0 
-                                ? `${t('content.modal.password.form.button')} (${countdown}s)` 
-                                : (loadingPassword ? '' : t('content.modal.password.form.button'))}
+                            {loadingPassword ? '' : t('content.modal.password.form.button')}
                         </Button>
                         <p className='forgot-password' style={{ textAlign: 'center', cursor: 'pointer' }}>{t('content.modal.password.form.forgot_password')}</p>
                     </Form.Item>
@@ -131,8 +101,8 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     <div className='logo'>
                         <svg width="329" height="66" viewBox="0 0 329 66" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clipPath="url(#clip0_4111_993)">
+                                {/* Mình đã thu gọn phần path SVG ở đây để code ngắn gọn, bạn dán code gốc vào nhé */}
                                 <path d="..." fill="#66778A"></path>
-                                {/* Mã SVG của bạn giữ nguyên, mình thu gọn lại ở đây để code ngắn gọn */}
                             </g>
                             <defs>
                                 <clipPath id="clip0_4111_993"><rect width="329" height="66" fill="white"></rect></clipPath>
