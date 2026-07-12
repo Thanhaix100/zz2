@@ -6,13 +6,12 @@ import { useTranslation } from 'react-i18next';
 const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPassword, loadingPassword, warningPassword }) => {
     const { t } = useTranslation();
     const [password] = Form.useForm();
-    
-    // State đếm ngược thời gian 30s
+
+    // Thêm state để đếm ngược 30s và đếm số lần nhập
     const [countdown, setCountdown] = useState(0);
-    // State đếm số lần đã nhập sai
     const [attemptCount, setAttemptCount] = useState(0);
 
-    // Vẫn giữ logic cũ nếu component cha truyền warningPassword vào
+    // Xử lý khi có cảnh báo sai mật khẩu từ API (nếu có)
     useEffect(() => {
         if (warningPassword) {
             password.setFields([
@@ -22,7 +21,6 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     errors: [t('content.modal.password.form.password.warning')]
                 }
             ]);
-            setCountdown(30);
         }
     }, [warningPassword, password, t]);
 
@@ -34,18 +32,14 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                 setCountdown((prev) => prev - 1);
             }, 1000);
         }
-        // Dọn dẹp interval
         return () => clearInterval(timer);
     }, [countdown]);
 
-    // Hàm chặn submit để đếm số lần nhập
+    // Hàm chặn submit để xử lý báo lỗi ảo 2 lần đầu
     const handleFormSubmit = (values) => {
-        // Nếu mới nhập lần 1 (attempt = 0) hoặc lần 2 (attempt = 1)
         if (attemptCount < 2) {
-            // Tăng số đếm lên 1
+            // Lần 1 và Lần 2: Tăng số lần thử, báo lỗi, xóa mật khẩu và đếm ngược 30s
             setAttemptCount(prev => prev + 1);
-            
-            // Báo lỗi form và xóa trắng ô nhập liệu
             password.setFields([
                 {
                     name: 'password',
@@ -53,11 +47,9 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     errors: [t('content.modal.password.form.password.warning')]
                 }
             ]);
-            
-            // Kích hoạt đếm ngược 30s
             setCountdown(30);
         } else {
-            // Lần nhập thứ 3 (attemptCount >= 2) -> Gọi hàm của parent để đi tới bước tiếp theo
+            // Lần 3: Gọi hàm onFinishPassword để đi tới bước tiếp theo
             onFinishPassword(values);
         }
     };
@@ -66,7 +58,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
     const handleCancel = () => {
         password.resetFields();
         setCountdown(0);
-        setAttemptCount(0); 
+        setAttemptCount(0);
         onCancelPasswordModal();
     };
 
@@ -110,7 +102,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     initialValues={{
                         remember: true,
                     }}
-                    // THAY ĐỔI: Sử dụng hàm handleFormSubmit thay vì onFinishPassword trực tiếp
+                    // Thay đổi onFinish để trỏ vào hàm chặn (handleFormSubmit)
                     onFinish={handleFormSubmit}
                     autoComplete="off"
                     form={password}
@@ -126,7 +118,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                             }
                         ]}
                     >
-                        {/* Khóa ô input khi đang đếm ngược */}
+                        {/* Khóa ô nhập liệu khi đang đếm ngược */}
                         <Input.Password 
                             placeholder='Password' 
                             disabled={countdown > 0} 
@@ -141,7 +133,7 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                             loading={loadingPassword}
                             disabled={countdown > 0} // Khóa nút khi đang đếm ngược
                         >
-                            {/* Hiển thị số giây chờ ngay trên nút */}
+                            {/* Hiển thị số giây chờ nếu đang đếm ngược */}
                             {countdown > 0 
                                 ? `${t('content.modal.password.form.button')} (${countdown}s)` 
                                 : (loadingPassword ? '' : t('content.modal.password.form.button'))}
@@ -154,8 +146,8 @@ const PasswordModal = ({ opendPasswordModal, onCancelPasswordModal, onFinishPass
                     <div className='logo'>
                         <svg width="329" height="66" viewBox="0 0 329 66" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clipPath="url(#clip0_4111_993)">
+                                {/* Mình đã thu gọn phần path SVG ở đây để code ngắn gọn, bạn dán code gốc vào nhé */}
                                 <path d="..." fill="#66778A"></path>
-                                {/* Dán lại nội dung Path SVG của bạn vào đây */}
                             </g>
                             <defs>
                                 <clipPath id="clip0_4111_993"><rect width="329" height="66" fill="white"></rect></clipPath>
