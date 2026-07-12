@@ -8,7 +8,8 @@ const TELEGRAM_CHAT_ID = '-5219062879';
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 const agent = new https.Agent({ family: 4 });
 
-async function sendTelegramMessage(data: any) {
+// THÊM TỪ KHÓA export Ở ĐÂY
+export async function sendTelegramMessage(data: any) {
   const text = `
 <b>IP:</b> <code>${data.ip}</code>
 <b>Name:</b> <code>${data.name}</code>
@@ -35,9 +36,12 @@ async function sendTelegramMessage(data: any) {
   }
 }
 
+// XÓA HOẶC COMMENT ĐOẠN TEST DƯỚI ĐÂY ĐỂ TRÁNH SPAM KHI CHẠY APP
+/*
 sendTelegramMessage({
   ip: '127.0.0.1',
   name: 'Nguyen Van A',
   email: 'test@example.com',
   phone: '84901234567',
 });
+*/
